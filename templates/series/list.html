@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>LIST</title>
+</head>
+<body>
+    <a href="{{ url_for('series.create') }}">Create</a>
+    <ul>
+        {% for series_item in series %}
+            <li>
+                <a href="{{ url_for('series.view', series_id=series_item.id) }}">{{ series_item.title }}</a>
+                (<a href="{{ url_for('series.update', series_id=series_item.id) }}">Update</a> |
+                <a href="{{ url_for('series.delete', series_id=series_item.id) }}">Delete</a>)
+            </li>
+        {% endfor %}
+    </ul>
+</body>
+</html>

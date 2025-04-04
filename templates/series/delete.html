@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>DELETE</title>
+</head>
+<body>
+    <p>Do you want to delete it? "{{ series.title }}"?</p>
+    <form method="post">
+        {{ form.hidden_tag() }}
+        <p>{{ form.submit() }}</p>
+    </form>
+    <a href="{{ url_for('series.list') }}">Cancel</a>
+</body>
+</html>
