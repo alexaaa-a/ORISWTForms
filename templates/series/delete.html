@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block title %}DELETE{% endblock %}
+
+{% block content %}
+    <div class="form-container text-center">
+        <h2 class="mb-4">Delete Series</h2>
+        <p>Are you sure you want to delete "{{ series.title }}"?</p>
+        <form method="post" class="d-inline">
+            {{ form.hidden_tag() }}
+            <button type="submit" class="btn btn-danger">Delete</button>
+        </form>
+        <a href="{{ url_for('series.list') }}" class="btn btn-secondary">Cancel</a>
+    </div>
+{% endblock %}

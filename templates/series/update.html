@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block title %}Update{% endblock %}
+
+{% block content %}
+    <div class="form-container">
+        <h2 class="mb-4">Update Series</h2>
+        <form method="post">
+            {{ form.hidden_tag() }}
+            <div class="mb-3">
+                {{ form.title.label(class="form-label") }}
+                {{ form.title(class="form-control", value=series.title) }}
+            </div>
+            <div class="mb-3">
+                {{ form.description.label(class="form-label") }}
+                {{ form.description(class="form-control", rows=4) }}{{ series.description }}</textarea>
+            </div>
+            <button type="submit" class="btn btn-primary">Update</button>
+            <a href="{{ url_for('series.list') }}" class="btn btn-secondary">Cancel</a>
+        </form>
+    </div>
+{% endblock %}
