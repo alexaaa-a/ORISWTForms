@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block title %}CREATE{% endblock %}
+
+{% block content %}
+    <div class="form-container">
+        <h2 class="mb-4">Create Series</h2>
+        <form method="post">
+            {{ form.hidden_tag() }}
+            <div class="mb-3">
+                {{ form.title.label(class="form-label") }}
+                {{ form.title(class="form-control") }}
+            </div>
+            <div class="mb-3">
+                {{ form.description.label(class="form-label") }}
+                {{ form.description(class="form-control", rows=4) }}
+            </div>
+            <button type="submit" class="btn btn-primary">{{ form.submit.label }}</button>
+            <a href="{{ url_for('series.list') }}" class="btn btn-secondary">Back</a>
+        </form>
+    </div>
+{% endblock %}

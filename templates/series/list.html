@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block title %}LIST{% endblock %}
+
+{% block content %}
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Series List</h2>
+        <a href="{{ url_for('series.create') }}" class="btn btn-success">Create New</a>
+    </div>
+    
+    <ul class="series-list">
+        {% for series_item in series %}
+            <li class="d-flex justify-content-between align-items-center">
+                <a href="{{ url_for('series.view', series_id=series_item.id) }}">{{ series_item.title }}</a>
+                <span class="action-links">
+                    <a href="{{ url_for('series.update', series_id=series_item.id) }}" class="btn btn-sm btn-outline-primary">Update</a>
+                    <a href="{{ url_for('series.delete', series_id=series_item.id) }}" class="btn btn-sm btn-outline-danger">Delete</a>
+                </span>
+            </li>
+        {% endfor %}
+    </ul>
+{% endblock %}
