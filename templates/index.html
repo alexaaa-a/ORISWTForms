@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Series API</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen flex flex-col items-center p-4">
+    <h1 class="text-4xl font-bold text-center mt-6 mb-2">📺 Series API</h1>
+    <p class="text-gray-600 mb-8 text-center">Simple API to manage your favorite TV series.</p>
+
+    <!-- Create Series Form -->
+    <div class="bg-white rounded-2xl shadow-lg p-6 w-full max-w-md">
+        <h2 class="text-2xl font-semibold mb-4">Create New Series</h2>
+        <form id="create-form" class="space-y-4">
+            <div>
+                <label for="name" class="block text-sm font-medium text-gray-700">Title</label>
+                <input type="text" id="name" name="name" required
+                       class="mt-1 block w-full p-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
+            <div>
+                <label for="description" class="block text-sm font-medium text-gray-700">Description</label>
+                <textarea id="description" name="description" required rows="3"
+                          class="mt-1 block w-full p-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+            </div>
+            <button type="submit"
+                    class="w-full bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600 transition">
+                Create Series
+            </button>
+        </form>
+    </div>
+
+    <!-- Series List -->
+    <div class="bg-white rounded-2xl shadow-lg p-6 w-full max-w-2xl mt-10">
+        <h2 class="text-2xl font-semibold mb-4">Series List</h2>
+        <div class="flex justify-between mb-4">
+            <button onclick="fetchSeries()"
+                    class="bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 transition">
+                Refresh List
+            </button>
+        </div>
+        <ul id="series-list" class="space-y-3 text-gray-800">
+            <!-- Series will be loaded here dynamically -->
+        </ul>
+    </div>
+
+    <!-- Update Series Modal (hidden by default) -->
+    <div id="update-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden">
+        <div class="bg-white rounded-2xl shadow-lg p-6 w-full max-w-md">
+            <h2 class="text-2xl font-semibold mb-4">Update Series</h2>
+            <form id="update-form" class="space-y-4">
+                <input type="hidden" id="update-id">
+                <div>
+                    <label for="update-name" class="block text-sm font-medium text-gray-700">Title</label>
+                    <input type="text" id="update-name" name="name" required
+                           class="mt-1 block w-full p-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div>
+                    <label for="update-description" class="block text-sm font-medium text-gray-700">Description</label>
+                    <textarea id="update-description" name="description" required rows="3"
+                              class="mt-1 block w-full p-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+                </div>
+                <div class="flex space-x-4">
+                    <button type="submit"
+                            class="flex-1 bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600 transition">
+                        Update
+                    </button>
+                    <button type="button" onclick="closeUpdateModal()"
+                            class="flex-1 bg-gray-500 text-white py-2 rounded-lg hover:bg-gray-600 transition">
+                        Cancel
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Response Output -->
+    <div class="bg-white rounded-2xl shadow-lg p-6 w-full max-w-2xl mt-10">
+        <h2 class="text-2xl font-semibold mb-4">API Response</h2>
+        <pre id="response-output" class="bg-gray-100 p-4 rounded-lg overflow-x-auto"></pre>
+    </div>
+
+    <script>
+        // Fetch all series
+        async function fetchSeries() {
+            try {
+                const response = await fetch('/api/series');
+                const data = await response.json();
+                displaySeries(data);
+                displayResponse(data);
+            } catch (error) {
+                displayResponse({ error: error.message });
+            }
+        }
+
+        // Display series in the list
+        function displaySeries(series) {
+            const seriesList = document.getElementById('series-list');
+            seriesList.innerHTML = '';
+
+            if (series.length === 0) {
+                seriesList.innerHTML = '<li class="text-gray-500">No series available.</li>';
+                return;
+            }
+
+            series.forEach(serie => {
+                const li = document.createElement('li');
+                li.className = 'border p-3 rounded-lg shadow-sm flex justify-between items-center';
+                li.innerHTML = `
+                    <div>
+                        <strong>${serie.name}</strong>
+                        <p class="text-sm text-gray-600">${serie.description}</p>
+                    </div>
+                    <div class="flex space-x-2">
+                        <button onclick="openUpdateModal(${serie.id}, '${serie.name}', '${serie.description}')"
+                                class="bg-yellow-500 text-white py-1 px-2 rounded hover:bg-yellow-600 transition text-sm">
+                            Edit
+                        </button>
+                        <button onclick="deleteSeries(${serie.id})"
+                                class="bg-red-500 text-white py-1 px-2 rounded hover:bg-red-600 transition text-sm">
+                            Delete
+                        </button>
+                    </div>
+                `;
+                seriesList.appendChild(li);
+            });
+        }
+
+        // Create new series
+        document.getElementById('create-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const formData = {
+                name: document.getElementById('name').value,
+                description: document.getElementById('description').value
+            };
+
+            try {
+                const response = await fetch('/api/series', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(formData)
+                });
+                const data = await response.json();
+                displayResponse(data);
+                if (response.status === 201) {
+                    fetchSeries();
+                    document.getElementById('create-form').reset();
+                }
+            } catch (error) {
+                displayResponse({ error: error.message });
+            }
+        });
+
+        // Update series
+        document.getElementById('update-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const id = document.getElementById('update-id').value;
+            const formData = {
+                name: document.getElementById('update-name').value,
+                description: document.getElementById('update-description').value
+            };
+
+            try {
+                const response = await fetch(`/api/series/${id}`, {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(formData)
+                });
+                const data = await response.json();
+                displayResponse(data);
+                if (response.status === 200) {
+                    fetchSeries();
+                    closeUpdateModal();
+                }
+            } catch (error) {
+                displayResponse({ error: error.message });
+            }
+        });
+
+        // Delete series
+        async function deleteSeries(id) {
+            if (!confirm('Are you sure you want to delete this series?')) return;
+
+            try {
+                const response = await fetch(`/api/series/${id}`, {
+                    method: 'DELETE'
+                });
+                const data = await response.json();
+                displayResponse(data);
+                if (response.status === 200) {
+                    fetchSeries();
+                }
+            } catch (error) {
+                displayResponse({ error: error.message });
+            }
+        }
+
+        // Update modal functions
+        function openUpdateModal(id, name, description) {
+            document.getElementById('update-id').value = id;
+            document.getElementById('update-name').value = name;
+            document.getElementById('update-description').value = description;
+            document.getElementById('update-modal').classList.remove('hidden');
+        }
+
+        function closeUpdateModal() {
+            document.getElementById('update-modal').classList.add('hidden');
+        }
+
+        // Display API responses
+        function displayResponse(data) {
+            document.getElementById('response-output').textContent = JSON.stringify(data, null, 2);
+        }
+
+        // Initial load
+        fetchSeries();
+    </script>
+</body>
+</html>
